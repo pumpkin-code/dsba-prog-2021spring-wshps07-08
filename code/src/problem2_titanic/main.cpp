@@ -83,11 +83,119 @@
 #include <algorithm>
 
 
+// TODO: consider substitution of all “magic constants” (like comma , semicolon ; in the methods below) by named constants
+
+
+// \r carriage return — a character with a code 13
+// \n —  a character with code 10
+
+//typedef std::vector<std::string> VecStrings;
+using VecStrings = std::vector<std::string>;
+
+
+// define some named constants in order to avoid appearing of “magic constants” in the code
+//const char SURVIVED_FLAG[] = "1";
+const char* SURVIVED_FLAG = "1";
+
+
+// if we were using a C++ compiler prior to 11-th standard, there would be an
+// insufficient copy operations while making a temporary string object
+// starting with C++11 this uns. c. is eliminated by the move semnatic
+// moreover, there is such an optimization technic. which is used by the
+// modern compiler called the Copy Elision Optimization
+std::string extractSurname(const std::string& personFullName)
+{
+    std::stringstream ss(personFullName);
+    std::string surname;
+    std::getline(ss, surname, ';');
+
+    return surname;
+}
+
+
+
+/// 2.1) Extract data (surname and whether the person survived or not) from one line of input.
+//bool extractNameAndSurv(const std::string& person, std::string& surname)
+bool isSurvived(const std::string& person, std::string& surname)
+{
+    std::stringstream ss(person);
+    std::string attrStr;                // here we are going to store extracted attributes
+
+    // skipping the first (PassengerId) attribute
+    std::getline(ss, attrStr, ',');     // e.g. attrStr == "1"
+
+    // read the survived attribute
+    std::getline(ss, attrStr, ',');
+    bool survivedStatus = (attrStr == SURVIVED_FLAG); // "1";
+
+    // skip one more line related to attribute Pclass
+    std::getline(ss, attrStr, ',');
+
+    // read the full name
+    std::getline(ss, attrStr, ',');     // attrStr consits of "Braund; Mr. Owen Harris"
+
+
+    // temporary for testing purpose only
+    //surname = attrStr;                  // here we actully have the full name
+    surname = extractSurname(attrStr);
+
+    return survivedStatus;
+}
+
+
+// if we were using a C++ compiler prior to 11-th standard, there would be an
+// insufficient copy operations while making a temporary string object
+// starting with C++11 this uns. c. is eliminated by the move semnatic
+// moreover, there is such an optimization technic. which is used by the
+// modern compiler called the Copy Elision Optimization
+//std::string foo()
+// the same for a pair std::pair<bool, std::string>
+//{
+
+//}
+
+
+
+/// 2) Create a function called toCountSurvived that obtains an input stream
+/// object (given by reference) istream& (input.csv), reads the whole file
+/// line by line and saves surnames ("Braund; Mr. Owen Harris" will be just
+/// "Braund") of survived people from input.csv (Survived column).
+/// The function returns data of type VecStrings -- vector of surnames of survivors.
+//VecStrings toCountSurvived(std::istream& passengers)
+//{
+//    bool skipLine = true;       // true if one needs to skip
+
+//    bool implicitPassConversion = (bool)passengers;     // now we can convert a stream to a logical value, we to interpret its internal state somehow
+
+//    while (passengers           //  almost == passengers.good()        // we can convert a steram to a logical expression implicitly, because of the operator bool defined in the std::ios::
+//           && !passengers.eof())
+//    {
+//        if (skipLine)
+//        {
+//            skipLine = false;   // prevent skipping all the following lines
+//            continue;
+//        }
+
+//        // reading regular lines
+//        std::string s;
+//        std::getline(passengers, s);
+//    }
+
+//}
+
+
 
 int main ()
 {
-    const std::string INP_FILE_NAME = "../../data/problem2_titanic/titanic.csv";
-    std::ifstream input_file;
-    input_file.open(INP_FILE_NAME);
+    // want to check a correctnes of isSurvived() method
+    std::string surname;
+    bool survStatus = isSurvived("1,0,3,Braund; Mr. Owen Harris,male,22,1,0,A/5 21171,7.25,,S",
+               surname);
+
+    int a = 0;
+
+    //    const std::string INP_FILE_NAME = "../../data/problem2_titanic/titanic.csv";
+//    std::ifstream input_file;
+//    input_file.open(INP_FILE_NAME);
 
 }
