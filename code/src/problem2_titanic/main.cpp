@@ -33,13 +33,15 @@
 /// N) Name_n
 ///
 ///
-///
+///     TODO: HW for 11.02.2021 — No. 4
 /// 4) Create a function called getFareForClass that takes an input stream object
 /// istream& and an integer number representing class (Pclass, 1 to 3), reads the stream 
 /// until the end and returns the mean fare value of people of the given class.
 /// The function returns a single value of type double -- the mean fair value.
 /// Use at least two intermediate functions in problem 4.
 ///
+///
+///     TODO: HW for 11.02.2021  — NoNo. 5 and 6
 ///
 /// Additional problems
 ///
@@ -96,6 +98,47 @@ using VecStrings = std::vector<std::string>;
 // define some named constants in order to avoid appearing of “magic constants” in the code
 //const char SURVIVED_FLAG[] = "1";
 const char* SURVIVED_FLAG = "1";
+
+
+// the prototype (a declaration) of the function must be presented here if we call the
+// function prior to define itst body
+VecStrings toCountSurvived(std::istream& passengers);
+
+
+// print the lements of the given vector
+// the intention is not only not to change the vector, but also to strictly prohibit
+// any possibility of changing the vector, this is why we use const & (MUST BE USED!)
+void printVec(const VecStrings& strVec);
+
+
+int main()
+{
+    // want to check a correctnes of isSurvived() method
+//    std::string surname;
+//    bool survStatus = isSurvived("1,0,3,Braund; Mr. Owen Harris,male,22,1,0,A/5 21171,7.25,,S",
+//               surname);
+
+//    int a = 0;
+
+    const std::string INP_FILE_NAME = "../../data/problem2_titanic/titanic.csv";
+    //const std::string INP_FILE_NAME = "titanic.csv";
+    std::ifstream inputFile;           // can read only from the file
+    inputFile.open(INP_FILE_NAME);
+
+    // check if the file has been opened correctly
+    if (!inputFile.is_open())           // use the inverted logic
+    {
+        std::cerr << "The titanic file can't be open";
+        return 1;                       // return the errorcode that is not eq to 0, which indicates an error situation
+    }
+
+    // if we reach this point the file is opened properly
+    VecStrings survived = toCountSurvived(inputFile);         // if terms of inheritance ifstream is an extension of istream, anh thus
+                                        // ifstream can be passed as an actual parameter whenever we expect istream as a formal parameter
+                                        // ifstream --|> istream
+    printVec(survived);                 // TODO: HW: reflect call of this function at the UML Sequence Diagram
+}
+
 
 
 // if we were using a C++ compiler prior to 11-th standard, there would be an
@@ -161,41 +204,49 @@ bool isSurvived(const std::string& person, std::string& surname)
 /// line by line and saves surnames ("Braund; Mr. Owen Harris" will be just
 /// "Braund") of survived people from input.csv (Survived column).
 /// The function returns data of type VecStrings -- vector of surnames of survivors.
-//VecStrings toCountSurvived(std::istream& passengers)
-//{
-//    bool skipLine = true;       // true if one needs to skip
-
-//    bool implicitPassConversion = (bool)passengers;     // now we can convert a stream to a logical value, we to interpret its internal state somehow
-
-//    while (passengers           //  almost == passengers.good()        // we can convert a steram to a logical expression implicitly, because of the operator bool defined in the std::ios::
-//           && !passengers.eof())
-//    {
-//        if (skipLine)
-//        {
-//            skipLine = false;   // prevent skipping all the following lines
-//            continue;
-//        }
-
-//        // reading regular lines
-//        std::string s;
-//        std::getline(passengers, s);
-//    }
-
-//}
-
-
-
-int main ()
+VecStrings toCountSurvived(std::istream& passengers)
 {
-    // want to check a correctnes of isSurvived() method
-    std::string surname;
-    bool survStatus = isSurvived("1,0,3,Braund; Mr. Owen Harris,male,22,1,0,A/5 21171,7.25,,S",
-               surname);
+    bool skipLine = true;       // true if one needs to skip
 
-    int a = 0;
+    // only for example
+    //bool implicitPassConversion = (bool)passengers;     // now we can convert a stream to a logical value, we to interpret its internal state somehow
 
-    //    const std::string INP_FILE_NAME = "../../data/problem2_titanic/titanic.csv";
-//    std::ifstream input_file;
-//    input_file.open(INP_FILE_NAME);
+    VecStrings survivors;
 
+    while (passengers           //  almost == passengers.good()        // we can convert a steram to a logical expression implicitly, because of the operator bool defined in the std::ios::
+           && !passengers.eof())
+    {
+        // reading regular lines
+        std::string passengerInfo;                  // "1,0,3,Braund; Mr. Owen Harris,male,22,1,0,A/5 21171,7.25,,S"
+        std::getline(passengers, passengerInfo);    // here we extract another line consisting of info about a single passenger (person)
+
+        if (skipLine)
+        {
+            skipLine = false;   // prevent skipping all the following lines
+            continue;
+        }
+
+        // retuse a code snippet from the main() function, where it was used for testing purposes
+        // the idea of testing code is not only to test the “correctnes” of a developed function,
+        // but also to provide an example of its usage
+        std::string surname;
+        bool survStatus = isSurvived(passengerInfo, surname);
+        if (survStatus)
+            survivors.push_back(surname);
+    }
+
+    return survivors;                     // TODO: let's return a real vector, now it's a dummy
 }
+
+void printVec(const VecStrings& strVec)
+{
+    // here vector<std::string>::const_reference refer to the proper const string&
+    // datatype, and it can be used for sake of convenience (it allows just to
+    // mention the VecStrings type alias w/t a need to recollect of what is the
+    // real datatype of elements of the given container)
+    for (VecStrings::const_reference s : strVec)
+    //for (const std::string& s : strVec)             // it's a direct alternative (the type is the same)
+        std::cout << s << "\n";
+}
+
+
