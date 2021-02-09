@@ -83,11 +83,103 @@
 #include <algorithm>
 
 
+/// 1) Define an alias VecStrings for the std::vector<std::string> datatype
+/// using the typedef keyword.
+//typedef std::vector<std::string> VecStrings;
+ // ^ is a keyword which is used when we want to create “another name” (alias) for an existing data type
+
+using VecStrings = std::vector<std::string>;
+ // ^ is a keyword which allows to do the same as the typedef does, and even more (a bit more modern approach)
+
+// named constant provinding a text representation of a survived attribute
+const std::string SURVIVED_ATTR = "1";
+
+
+/// 2) Create a function called toCountSurvived that obtains an input stream
+/// object (given by reference) istream& (input.csv), reads the whole file
+/// line by line and saves surnames ("Braund; Mr. Owen Harris" will be just
+/// "Braund") of survived people from input.csv (Survived column).
+/// The function returns data of type VecStrings -- vector of surnames of survivors.
+
+VecStrings toCountSurvived(std::istream& istr)
+{
+    bool skipLine = true;   // the flag indicates whether the current line (read from the file)
+                            // is skipped or not. By setting it to true initially, we do skip the
+                            // very first line
+
+    VecStrings survivedPassengersSurnames;
+
+    while (istr             // (bool)istr means the the stream is treated as a logical expression (implicitly) that return TRUE whenever the stream IS in a good mood (state), otherwise returns FALSE
+                            // works almost like istr.good() except of eofbit flag (and, actually, goodbit flag as well)
+           && !istr.eof())  // checks the presence of Enf-of-File flag individually
+    {
+        std::string curPassenger;      // a string storing the information about current passenger
+        //istr >> curPassenger          // we can't use the operator>> to read data containing spaces, because the only prefix before the very first space will be read
+
+        //std::stringstream ss;
+        // ss.getline()
+             // ^^ ANY_STREAM.getline() deals with unsafe and inconvinient c-string (null-terminated strings), and it's better to use std::getline() instead
+             // STREAM.getline() and std::getline() methods ARE NOT the SAME
+        std::getline(istr, curPassenger);
+
+        if (skipLine)                   // if we are asked (by whom?) to skip the current line, let's do that
+        {
+            skipLine = false;           // we have to prevent skipping the further lines, so we need to set the value of this “slipping” flag to FALSE
+            continue;                   // go to the next iteration immediately, skipping the rest part of the loop body below this line
+        }
+
+        // some operations with the current line
+        // what we need to do is to parse the current line considering commas , as a separator
+
+        std::stringstream curPassengerStream(curPassenger);     // here we treat a string as to be a stream, and can apply corresponded operations
+        std::string attr;                                       // a string storing a currently read attribute
+        std::getline(curPassengerStream, attr, ',');            // https://www.cplusplus.com/reference/string/string/getline/?kw=getline
+        // ^^ the very first attribute that is read by the statement above is being skipped, because it represents the passenger's ID, which is not needed for us
+
+
+        // the second call of getline() extracts the second attribute corresponding to Survived
+        std::getline(curPassengerStream, attr, ',');
+        bool survived = (attr == SURVIVED_ATTR); //"1";         // if survived attribute is 0, it meanse that the passenger dies in the Titanic crash
+                                                                // appearing of "0" means presence of so-called “magic” constant, which must be avoid (use name constants instead)
+
+        std::getline(curPassengerStream, attr, ',');            // skip another attribute, passenger class
+
+        // now we are ready to read the full name of the passenger
+        std::getline(curPassengerStream, attr, ',');            //
+    }
+
+    return survivedPassengersSurnames;
+}
+
+
+
+
+
+
 
 int main ()
 {
+                                    // e.g. may provide the absolute path
+                                    // "/user/liza/..../data/problem2_titanic/titanic.csv"
     const std::string INP_FILE_NAME = "../../data/problem2_titanic/titanic.csv";
-    std::ifstream input_file;
-    input_file.open(INP_FILE_NAME);
+    std::ifstream inputFile;
+    inputFile.open(INP_FILE_NAME);
+
+    if (!inputFile.is_open())
+    {
+        std::cerr << "Can't ope the titanic file for reading, bye-bye";
+        return 1;           // 1 indicate an abnormal termination of the program
+    }
+
+    // if we reach this very line, it means that the file is open correctly
+    toCountSurvived(inputFile);     // we put an ifstream object AS an istream object, because any ifstream object IS istream object, but vice versa (the inheritance looks like ifstream --|> istream)
+
+
+    // if were working with fstream which allows both to read and write, we would need to specify std::ios_base::in flag
+    // to “show” that we are aiming to read from the file only
+//    std::fstream f;
+//    f.open(INP_FILE_NAME, std::ios_base::in);   //
+
+
 
 }
